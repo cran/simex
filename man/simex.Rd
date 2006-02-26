@@ -53,7 +53,7 @@ Carroll, R.J., Küchenhoff,H., Lombard,F. and Stefanski L.A. (1996) Asymptotics f
 
 Carrol, R.J., Ruppert, D. and Stefanski L.A. (1995). \emph{Measurement Error in Nonlinear Models.} London: Chapman and Hall.
 }
-\author{Wolfgang Lederer,\email{wolfgang.lederer@stat.uni-muenchen.de}}
+\author{Wolfgang Lederer,\email{wolfgang.lederer@googlemail.com}}
 \seealso{\code{\link{mcsimex}} for discreete data with misclassification, \code{\link[stats]{lm}},\code{\link[stats]{glm}}, \code{\link{refit}}}
 \examples{
 # to test nonlinear extrapolation set.seed(3)

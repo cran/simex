@@ -9,7 +9,7 @@ function(model# The naive model
 , fitting.method = "quad")# fitting method
 {
 fitting.method <- substr(fitting.method,1,4)
-if(!any(fitting.method == c("quad", "line", "nonl", "logl")))
+if(!any(fitting.method == c("quad", "line", "nonl", "logl","log2")))
 {
 warning("Fitting Method not implemented. Using: quadratic\n\n", call. = FALSE)
 fitting.method <- "quad"
@@ -25,7 +25,7 @@ warning("lambda should not contain 0 or negativ values. 0 or negative values wil
 lambda <- lambda[lambda >= 0]
 }
 if(!any(names(model)== "x") && asymptotic) stop("The option x must be enabeld in the naive model for asymptotic variance estimation", call. = FALSE)
-  if(!is.list(mc.matrix)){
+  if(is.matrix(mc.matrix)){
      mc.matrix <- list(mc.matrix)
      names(mc.matrix) <- SIMEXvariable
      }
@@ -33,6 +33,7 @@ if(!any(names(model)== "x") && asymptotic) stop("The option x must be enabeld in
 if(!all(check.mc.matrix(mc.matrix))) stop("mc.matrix may contain negative values for exponents smaller than 1", call. = FALSE)
 if(length(mc.matrix) != length(SIMEXvariable)) stop("mc.matrix and SIMEXvariable do not match")
 }
+if(any(!sapply(as.data.frame(model$model),is.factor)[SIMEXvariable])) stop("SIMEXvariable must be a factor", call. = FALSE)
 cl <- match.call()
 ncoef <- length(model$coefficients)
 ndes <- length(model$y)
@@ -108,19 +109,25 @@ am[[i+1]] <- ab / (B*ndes)
 }
 }
 lambda <- c(0,lambda)
+colnames(estimates) <- p.names
+# fitting the extrapolation function
 switch(fitting.method,
   "quad" = extrapolation <- lm(estimates ~ lambda + I(lambda^2))
 , "line"= extrapolation <- lm(estimates ~ lambda)
 , "logl"= extrapolation <- lm(I(log(t(t(estimates)+(abs(apply(estimates,2,min))+1)*(apply(estimates,2,min)<=0))))~lambda) 
+  , "log2"= extrapolation <- fit.logl(lambda,p.names,estimates)
 , "nonl"= extrapolation <- fit.nls(lambda,p.names,estimates)
 )
+  if(any(class(extrapolation) == "lm") && fitting.method == "log2") fitting.method <- "logl"
 #predicting the SIMEX estimate
+SIMEX.estimate<- vector(mode = "numeric", length =ncoef)
 switch(fitting.method,
   "quad"= SIMEX.estimate <- predict(extrapolation,newdata = data.frame(lambda = -1))
 , "line"= SIMEX.estimate <- predict(extrapolation,newdata = data.frame(lambda = -1))
 , "nonl"= for(i in 1:length(p.names)) SIMEX.estimate[i] <- predict(extrapolation[[p.names[i]]],newdata = data.frame(lambda = -1))
 , "logl"= SIMEX.estimate <- exp(predict(extrapolation,newdata = data.frame(lambda = -1))) - (abs(apply(estimates,2,min))+1)*(apply(estimates,2,min)<=0)
-)
+, "log2"= for(i in 1:length(p.names)) SIMEX.estimate[i] <- predict(extrapolation[[p.names[i]]],newdata = data.frame(lambda = -1)) - ((abs(apply(estimates,2,min))+1)*(apply(estimates,2,min)<=0))[i]
+      )
 if(jackknife.estimation != FALSE){
 variance.jackknife <- matrix(unlist(var.exp),ncol = ncoef^2 ,byrow = TRUE)
 switch(jackknife.estimation,
@@ -154,7 +161,8 @@ switch(fitting.method,
   "quad" = g <- c(1,-1,1)
 , "line" = g <- c(1,-1)
 , "logl" = for(i in 1:ncoef) g[[i]] <- c(exp(coef(extrapolation)[1,i] - coef(extrapolation)[2,i]), - exp(coef(extrapolation)[1,i] - coef(extrapolation)[2,i]))
-, "nonl" = for(i in 1:ncoef) g[[i]] <- c(-1,-(coef(extrapolation[[i]])[3]-1)^-1,coef(extrapolation[[i]])[2]/(coef(extrapolation[[i]])[3]-1)^2)
+, "log2" = for(i in 1:ncoef) g[[i]] <- c(exp(coef(extrapolation[[i]])[1] - coef(extrapolation[[i]])[2]), - exp(coef(extrapolation[[i]])[1] - coef(extrapolation[[i]])[2]))
+        , "nonl" = for(i in 1:ncoef) g[[i]] <- c(-1,-(coef(extrapolation[[i]])[3]-1)^-1,coef(extrapolation[[i]])[2]/(coef(extrapolation[[i]])[3]-1)^2)
 )
 g <- diag.block(g, ncoef)
 variance.asymptotic <- (t(g)%*%sigma.gamma%*%g) /ndes

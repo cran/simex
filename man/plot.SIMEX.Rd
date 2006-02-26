@@ -6,7 +6,7 @@
  Creates plots for the SIMEX- or MCSIMEX-class. For each variable a plot is produced showing the results of the extrapolation step.
 }
 \usage{
-plot.SIMEX(x, xlab = "lambda", ylab = colnames(b[, -1])
+plot.SIMEX(x, xlab = expression((1 + lambda)), ylab = colnames(b[, -1])
 	, ask = FALSE, show = rep(TRUE, NCOL(b) - 1), ...)
 }
 \arguments{

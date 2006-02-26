@@ -183,7 +183,11 @@ erg <- list(coefficients = z[1,-1]# SIMEX corrected coefficients
 class(erg) <- ("SIMEX")
 fitted.values <- predict(erg, newdata = model$model[,-1,drop=FALSE], type = "response")
 erg$fitted.values <- fitted.values
-erg$residuals <- model$model[,1] - fitted.values
+if(is.factor(model$model[,1])){
+   erg$residuals <- as.numeric(levels(model$model[,1]))[model$model[,1]] - fitted.values
+   }else{
+     erg$residuals <- model$model[,1] - fitted.values
+     }
 if(jackknife.estimation != FALSE){
 erg$extrapolation.variance <- extrapolation.variance
 erg$variance.jackknife <- variance.jackknife

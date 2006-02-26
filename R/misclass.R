@@ -3,7 +3,7 @@ function( data.org, mc.matrix, k=1)
 {
 if(!is.list(mc.matrix)) stop("mc.matrix must be a list", call. = FALSE)
 if(!is.data.frame(data.org)) stop("data.org must be a dataframe", call. = FALSE)
-if(!any(names(mc.matrix) == colnames(data.org))) stop("Names of mc.matrix and colnames of data.org do not match", call. = FALSE)
+if(!all(names(mc.matrix) %in% colnames(data.org))) stop("Names of mc.matrix and colnames of data.org do not match", call. = FALSE)
 if(k < 0) stop("k must be positiv")
 data.mc <- data.org
 factors <- lapply(data.org, levels)
@@ -13,7 +13,7 @@ for(j in data.names){
 evalue <- ev[[c(j,"values")]]
 evectors <- ev[[c(j,"vectors")]]
 d <- diag(evalue)
-mc <- evectors%*%d^k%*%solve(evectors)
+mc <- zapsmall(evectors%*%d^k%*%solve(evectors))
 dimnames(mc) <- dimnames(mc.matrix[[j]])
 for(i in factors[[j]]){
 data.mc[[j]][data.org[[j]]==i] <- sample(x = factors[[j]]

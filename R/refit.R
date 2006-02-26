@@ -3,9 +3,9 @@ function(object
 , fitting.method = "quad"
 , asymptotic = TRUE
 , jackknife = "quad"){
-if(object$fitting.method == fitting.method) stop("Model is already fitted with the specified fitting method", .call =FALSE)
+if(object$fitting.method == fitting.method) stop("Model is already fitted with the specified fitting method", call. =FALSE)
 fitting.method <- substr(fitting.method,1,4)
-if(!any(fitting.method == c("quad", "line", "nonl", "logl")))
+if(!any(fitting.method == c("quad", "line", "nonl", "logl", "log2")))
 {
  warning("Fitting method not implemented. Using: quadratic\n\n", call. = FALSE)
    fitting.method <- "quad"
@@ -48,14 +48,18 @@ switch(fitting.method,
   "quad" = extrapolation <- lm(estimates ~ lambda + I(lambda^2))
 , "line"= extrapolation <- lm(estimates ~ lambda)
 , "logl"= extrapolation <- lm(I(log(t(t(estimates)+(abs(apply(estimates,2,min))+1)*(apply(estimates,2,min)<=0))))~lambda) 
-, "nonl"= extrapolation <- fit.nls(lambda,p.names,estimates)
+, "log2"= extrapolation <- fit.logl(lambda,p.names,estimates)
+      , "nonl"= extrapolation <- fit.nls(lambda,p.names,estimates)
 )
-#predicting the SIMEX estimate
+## security if nls does not converge
+  if(any(class(extrapolation) == "lm") && fitting.method == "log2") fitting.method <- "logl"
+  #predicting the SIMEX estimate
 switch(fitting.method,
   "quad"= SIMEX.estimate <- predict(extrapolation,newdata = data.frame(lambda = -1))
 , "line"= SIMEX.estimate <- predict(extrapolation,newdata = data.frame(lambda = -1))
 , "nonl"= for(i in 1:length(p.names)) SIMEX.estimate[i] <- predict(extrapolation[[p.names[i]]],newdata = data.frame(lambda = -1))
-, "logl"= SIMEX.estimate <- exp(predict(extrapolation,newdata = data.frame(lambda = -1))) - (abs(apply(estimates,2,min))+1)*(apply(estimates,2,min)<=0)
+, "log2"= for(i in 1:length(p.names)) SIMEX.estimate[i] <- predict(extrapolation[[p.names[i]]],newdata = data.frame(lambda = -1)) - ((abs(apply(estimates,2,min))+1)*(apply(estimates,2,min)<=0))[i]
+      , "logl"= SIMEX.estimate <- exp(predict(extrapolation,newdata = data.frame(lambda = -1))) - (abs(apply(estimates,2,min))+1)*(apply(estimates,2,min)<=0)
 )
 # jackknife estimation
 if(jackknife != FALSE){
@@ -91,7 +95,8 @@ switch(fitting.method,
   "quad" = g <- c(1,-1,1)
 , "line" = g <- c(1,-1)
 , "logl" = for(i in 1:ncoef) g[[i]] <- c(exp(coef(extrapolation)[1,i] - coef(extrapolation)[2,i]), - exp(coef(extrapolation)[1,i] - coef(extrapolation)[2,i]))
-, "nonl" = for(i in 1:ncoef) g[[i]] <- c(-1,-(coef(extrapolation[[i]])[3]-1)^-1,coef(extrapolation[[i]])[2]/(coef(extrapolation[[i]])[3]-1)^2)
+  , "log2" = for(i in 1:ncoef) g[[i]] <- c(exp(coef(extrapolation[[i]])[1] - coef(extrapolation[[i]])[2]), - exp(coef(extrapolation[[i]])[1] - coef(extrapolation[[i]])[2]))
+          , "nonl" = for(i in 1:ncoef) g[[i]] <- c(-1,-(coef(extrapolation[[i]])[3]-1)^-1,coef(extrapolation[[i]])[2]/(coef(extrapolation[[i]])[3]-1)^2)
 )
 g <- diag.block(g, ncoef)
 variance.asymptotic <- (t(g)%*%sigma.gamma%*%g) /ndes

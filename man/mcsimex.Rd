@@ -17,7 +17,7 @@ mcsimex(model
 \arguments{
   \item{model}{ The naive model, the misclassified variable must be a factor}
   \item{mc.matrix}{If one variable is misclassified it can be a matrix. If more than one variable is misclssified it must be a list of the misclassification matrices, names must match with the SIMEXvariabel names, column- and row-names must match with the factor levels. If a special misclssification is desired, the name of a function can be specified (see details)}
-  \item{lambda}{ vector of exponents for the misclassification matrix (withou 0)}
+  \item{lambda}{ vector of exponents for the misclassification matrix (without 0)}
   \item{SIMEXvariable}{ vector of names of the variables for which the MCSIMEX-method should be applied}
   \item{B}{ number of iterations for each lambda}
   \item{fitting.method}{ linear, quadratic and loglinear are implemented (first 4 letters are enough)}
@@ -27,13 +27,15 @@ mcsimex(model
 \details{
 	if \code{mc.matrix} is a function the first argument of that function must 
 	be the whole dataset used in the naive model, the second argument must be 
-	the exponent (lambda) for the the misclassification. The function must return
+	the exponent (lambda) for the misclassification. The function must return
 	a \code{data.frame} containing the misclassified \code{SIMEXvariable}. An example can be found below.
 	
 	Asymptotic variance estimation is only implemented for \code{lm} and \code{glm}
 	
-	the loglinear fit has the form g(lambda,GAMMA) = exp(gamma0+gamma1*lambda). It is realized via the log() function. To avoid negaitve
+	The loglinear fit has the form g(lambda,GAMMA) = exp(gamma0+gamma1*lambda). It is realized via the log() function. To avoid negaitve
 	values the minimum +1 of the dataset is added and after the prediction later subtracted. exp(predict(...)) - min(data)-1
+	
+	the 'log2' fit is fitted via the \code{nls()} function. As starting values the fit of the loglinear extrapolant is used. For details see \code{\link{fit.logl}}
 }
 \value{
   object of class \code{MCSIMEX}
@@ -55,7 +57,7 @@ mcsimex(model
   ...
   }
 \references{ Küchenhoff, H., Mwalili, S. M.  and Lesaffre (2005) E. A general method for dealing with misclassification in regression: the Misclassification SIMEX. \emph{Biometrics},in press}
-\author{ Wolfgang Lederer, \email{wolfgang.lederer@stat.uni-muenchen.de}}
+\author{ Wolfgang Lederer, \email{wolfgang.lederer@googlemail.com}}
 \seealso{ \code{\link{misclass}}, \code{\link{simex}},\code{\link{refit}}}
 \examples{
 x <- rnorm(200,0,1.142)
