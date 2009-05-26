@@ -1,0 +1,20 @@
+export(build.mc.matrix,
+      check.mc.matrix,
+      diag.block,
+      mcsimex,
+      misclass,
+      refit,
+      simex)
+
+S3method(print, simex)
+S3method(summary, simex)
+S3method(print, summary.simex)
+S3method(plot, simex)
+S3method(predict, simex)
+S3method(refit, simex)
+S3method(print, mcsimex)
+S3method(summary, mcsimex)
+S3method(print, summary.mcsimex)
+S3method(plot, mcsimex)
+S3method(predict, mcsimex)
+S3method(refit, mcsimex)

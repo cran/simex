@@ -1,8 +1,18 @@
 Package: simex
+Type: Package
+Version: 1.4
+Date: 2009-05-26
+Depends: stats
+Suggests: mgcv, nlme
 Title: SIMEX- and MCSIMEX-Algorithm for measurement error models
-Version: 1.2
-Author: Wolfgang Lederer <Wolfgang.Lederer@googlemail.com>, Helmut Küchenhoff <Kuechenhoff@stat.uni-muenchen.de>
-Description: Implementation of the SIMEX-Algorithm by Cook & Stefanski and MCSIMEX by Küchenhoff, Mwalili & Lesaffre
+Author: Wolfgang Lederer <Wolfgang.Lederer@googlemail.com>, Helmut
+        Küchenhoff <Kuechenhoff@stat.uni-muenchen.de>
 Maintainer: Wolfgang Lederer <Wolfgang.Lederer@googlemail.com>
-License: GPL
-Packaged: Sun Feb 26 21:12:27 2006; hornik
+Description: Implementation of the SIMEX-Algorithm by Cook & Stefanski
+        and MCSIMEX by Küchenhoff, Mwalili & Lesaffre
+License: GPL (>= 2)
+Encoding: latin1
+LazyLoad: yes
+Packaged: 2009-05-26 22:00:56 UTC; Wolfgang
+Repository: CRAN
+Date/Publication: 2009-05-27 08:59:33
