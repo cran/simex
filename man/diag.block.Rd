@@ -24,7 +24,7 @@ diag.block(d, n)
   supplied matrix or vector on the diagonal.
 }
 
-\author{ Wolfgang Lederer, \email{wolfgang.lederer@googlemail.com}}
+\author{ Wolfgang Lederer, \email{wolfgang.lederer@gmail.com}}
 
 \seealso{\code{\link[base]{diag}}, \code{\link[base]{kronecker}}}
 

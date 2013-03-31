@@ -116,7 +116,7 @@ Lederer, W. and Küchenhoff, H. (2006) A short introduction to the SIMEX and MCSI
 
 }
 
-\author{ Wolfgang Lederer, \email{wolfgang.lederer@googlemail.com}}
+\author{ Wolfgang Lederer, \email{wolfgang.lederer@gmail.com}}
 
 \seealso{\code{\link[simex]{misclass}}, \code{\link[simex]{simex}}}
 
@@ -143,6 +143,7 @@ par(op)
 # example for a function which can be supplied to the function mcsimex()
 # "ystar" is the variable which is to be misclassified
 # using the example above
+\dontrun{
 my.misclass <- function (datas, k) {
 	ystar <- datas$"ystar"
 	p1 <- matrix(data = c(0.75, 0.25, 0.25, 0.75), nrow = 2, byrow = FALSE)
@@ -160,6 +161,7 @@ my.misclass <- function (datas, k) {
 }
 
 simex.model.differential <- mcsimex(naive.model, mc.matrix = "my.misclass", SIMEXvariable = "ystar")
+}
 }
 
 \keyword{models}

@@ -59,7 +59,7 @@ Israel, R.B., Rosenthal, J.S., Wei, J.Z., Finding generators for Markov Chains
   via empirical transition matrices, with applications to credit ratings,
   \emph{Mathematical Finance}, \bold{11}, 245--265}
 
-\author{ Wolfgang Lederer, \email{wolfgang.lederer@googlemail.com}}
+\author{ Wolfgang Lederer, \email{wolfgang.lederer@gmail.com}}
 
 \note{Does not always work! So check properly.}
 

@@ -36,12 +36,15 @@ refit(object, ...)
   \item{model}{the naive model}
   \item{SIMEXvariable}{character or vector of characters containing the names of
     the variables with measurement error}
-  \item{measurement.error}{vector of standard deviations of the known measurement
-    errors}
+  \item{measurement.error}{given standard deviations of measurement errors. In
+    case of homoskedastic meeasurement error it is a matrix with dimension 
+    1x\code{length(SIMEXvariable)}. In case of heteroskedastic error for at least one
+    SIMEXvariable it is a matrix of dimension nx\code{length(SIMEXvariable)}, where n
+    is the sample size, see examples.}
   \item{lambda}{vector of lambdas for which the simulation step should be done
     (without 0)}
   \item{B}{number of iterations for each lambda}
-  \item{fitting.method}{fitting method \code{linear}, \code{quadratic},
+  \item{fitting.method}{fitting method for the extrapolation. \code{linear}, \code{quadratic},
     \code{nonlinear} are implemented. (first 4 letters are enough)}
   \item{jackknife.estimation}{specifying the extrapolation method for jackknife
     variance estimation. Can be set to \code{FALSE} if it should not be performed}
@@ -66,7 +69,7 @@ refit(object, ...)
   instable. It is not advisable to use this feature. If a nonlinear extrapolation
   is desired please use the \code{refit()} method.
 
-  Asymptotic is only implemented for naive models of class \code{lm} or \code{glm}.
+  Asymptotic is only implemented for naive models of class \code{lm} or \code{glm} with homoscedastic measurement error.
 
   \code{refit()} refits the object with a different extrapolation function.
 }
@@ -80,8 +83,8 @@ refit(object, ...)
    \item{B}{the number of iterations,}
    \item{extrapolation}{the model object of the extrapolation step,}
    \item{fitting.method}{the fitting method used in the extrapolation step,}
-   \item{residuals}{the residuals,}
-   \item{fitted.values}{the fitted values,}
+   \item{residuals}{the residuals of the main model,}
+   \item{fitted.values}{the fitted values of the main model,}
    \item{call}{the function call,}
    \item{variance.jackknife}{the jackknife variance estimate,}
    \item{extrapolation.variance}{the model object of the variance extrapolation,}
@@ -108,33 +111,105 @@ Lederer, W. and Küchenhoff, H. (2006) A short introduction to the SIMEX and MCSI
  
 }
 
-\author{Wolfgang Lederer,\email{wolfgang.lederer@googlemail.com}}
+\author{Wolfgang Lederer,\email{wolfgang.lederer@gmail.com}, Heidi Bold}
 
 \seealso{\code{\link[simex]{mcsimex}} for discrete data with misclassification,
   \code{\link[stats]{lm}}, \code{\link[stats]{glm}}}
 
 \examples{
-# to test nonlinear extrapolation
-#set.seed(3)
-x <- rnorm(200, 0, 100)
-u <- rnorm(200, 0, 25)
-w <- x + u
-y <- x + rnorm(200, 0, 9)
-true.model <- lm(y ~ x)
-naive.model <- lm(y ~ w, x = TRUE)
-simex.model <- simex(model = naive.model, SIMEXvariable = "w",
-    measurement.error = 25)
-plot(x, y)
-abline(true.model, col = "darkblue")
-abline(simex.model, col = "red")
-abline(naive.model, col = "green")
-legend(min(x), max(y), legend = c("True Model", "SIMEX model", "Naive Model"),
-    col = c("darkblue", "red", "green"), lty = 1)
+## Seed
+set.seed(49494)
 
-plot(simex.model, mfrow = c(2, 2))
+## simulating the measurement error standard deviations
+sd_me <- 0.3
+sd_me2 <- 0.4
+temp <- runif(100, min = 0, max = 0.6)
+sd_me_het1 <- sort(temp)
+temp2 <- rnorm(100, sd = 0.1)
+sd_me_het2 <- abs(sd_me_het1 + temp2)
 
-simex.model2 <-  refit(simex.model, "line")
-plot(simex.model2, mfrow = c(2, 2))
+## simulating the independent variables x (real and with measurement error):
+x_real <- rnorm(100)
+x_real2 <- rpois(100, lambda = 2)
+x_real3 <- -4*x_real + runif(100, min = -10, max = 10)  # correlated to x_real
+
+x_measured <- x_real + sd_me * rnorm(100)
+x_measured2 <- x_real2 + sd_me2 * rnorm(100)
+x_het1 <- x_real + sd_me_het1 * rnorm(100)
+x_het2 <- x_real3 + sd_me_het2 * rnorm(100)
+
+## calculating dependent variable y:
+y <- x_real + rnorm(100, sd = 0.05)
+y2 <- x_real + 2*x_real2 + rnorm(100, sd = 0.08)
+y3 <- x_real + 2*x_real3 + rnorm(100, sd = 0.08)
+
+
+### one variable with homoscedastic measurement error
+(model_real <- lm(y ~ x_real))
+
+(model_naiv <- lm(y ~ x_measured, x = TRUE))
+
+(model_simex <- simex(model_naiv, SIMEXvariable = "x_measured", measurement.error = sd_me))
+plot(model_simex)
+
+
+### two variables with homoscedastic measurement errors
+(model_real2 <- lm(y2 ~ x_real + x_real2))
+
+(model_naiv2 <- lm(y2 ~ x_measured + x_measured2, x = TRUE))
+
+(model_simex2 <- simex(model_naiv2, SIMEXvariable = c("x_measured", "x_measured2"), 
+                           measurement.error = cbind(sd_me, sd_me2)))
+
+plot(model_simex2)
+
+\dontrun{
+### one variable with increasing heteroscedastic measurement error
+model_real 
+
+(mod_naiv1 <- lm(y ~ x_het1, x = TRUE))
+
+(mod_simex1 <- simex(mod_naiv1, SIMEXvariable = "x_het1", measurement.error = sd_me_het1, asymptotic = FALSE))
+
+plot(mod_simex1)
+
+
+### two correlated variables with heteroscedastic measurement errors
+(model_real3 <- lm(y3 ~ x_real + x_real3))
+
+(mod_naiv2 <- lm(y3 ~ x_het1 + x_het2, x = TRUE))
+
+(mod_simex2 <- simex(mod_naiv2, SIMEXvariable = c("x_het1", "x_het2"), 
+                         measurement.error = cbind(sd_me_het1, sd_me_het2), asymptotic = FALSE))
+plot(mod_simex2)
+
+
+### two variables, one with homoscedastic, one with heteroscedastic measurement error
+model_real2
+
+(mod_naiv3 <- lm(y2 ~ x_measured + x_het2, x = TRUE))
+
+(mod_simex3 <- simex(mod_naiv3, SIMEXvariable = c("x_measured", "x_het2"), 
+                         measurement.error = cbind(sd_me, sd_me_het2), asymptotic = FALSE))
+
+
+### glm: two variables, one with homoscedastic, one with heteroscedastic measurement error
+t <- x_real + 2*x_real2 + rnorm(100, sd = 0.01)
+g <- 1 / (1 + exp(t))
+u <- runif(100)
+ybin <- as.numeric(u < g)
+
+
+(logit_real <- glm(ybin ~ x_real + x_real2, family = binomial))
+
+(logit_naiv <- glm(ybin ~ x_measured + x_het2, x = TRUE, family = binomial))
+
+(logit_simex <- simex(logit_naiv, SIMEXvariable = c("x_measured", "x_het2"), 
+                          measurement.error = cbind(sd_me, sd_me_het2), asymptotic = FALSE))
+summary(logit_simex)
+print(logit_simex)
+plot(logit_simex)
+}
 }
 
 \keyword{models}

@@ -1,5 +1,18 @@
 simex NEWS:
 ===========
+Version 1.5:
+------------
+(by Heidi Bold & Wolfgang Lederer)
+
+* Option fitting.method in function simex() now works properly for "linear" (Wolfgang)
+
+* Measurement errors may now be heteroscedastic. Therefore the input-type had (Heidi)
+  to be changed. The measurement error now has to be a matrix.
+  
+* The functions simex and print.summary.simex were adjusted. (Heidi)
+
+
+
 
 Version 1.4:
 ------------
