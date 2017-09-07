@@ -15,8 +15,8 @@
   \tabular{ll}{
     Package: \tab simex\cr
     Type: \tab Package\cr
-    Version: \tab 1.5\cr
-    Date: \tab 2013-03-31\cr
+    Version: \tab 1.7\cr
+    Date: \tab 2016-03-25\cr
     License: \tab GPL 2 or above\cr
     LazyLoad: \tab yes\cr
   }
@@ -28,12 +28,13 @@
   Functions \code{simex()} and \code{mcsimex()} can be used on models issued
   from \code{lm()}, \code{glm()} with asymtotic estimation.
   Models from \code{nls()}, \code{gam()} (package \pkg{mgcv}),
+  \code{polr()} (package \pkg{MASS}),
   \code{lme()} and \code{nlme()} (package \pkg{nlme}) can also be corrected with
   these algorithms, but without asymptotic estimations.
 }
 
 \author{
-Wolfgang Lederer
+Wolfgang Lederer, Heidi Seibold, Helmut Küchenhoff
 
 Maintainer: Wolfgang Lederer,\email{wolfgang.lederer@gmail.com}
 }
@@ -48,7 +49,7 @@ Lederer, W. and Küchenhoof, H. (2006) A short introduction to the SIMEX and
 
   and for functions generating the initial naive models:
   \code{\link[stats]{lm}}, \code{\link[stats]{glm}}, \code{nls},
-  \code{gam}, \code{lme}, \code{nlme}
+  \code{gam}, \code{lme}, \code{nlme}, \code{polr}
 }
 
 \examples{
@@ -105,7 +106,8 @@ model_real
 
 (mod_naiv1 <- lm(y1  ~ x_het1, x = TRUE))
 
-(mod_simex1 <- simex(mod_naiv1, SIMEXvariable = "x_het1", measurement.error = sd_me_het1, asymptotic = FALSE))
+(mod_simex1 <- simex(mod_naiv1, SIMEXvariable = "x_het1",
+     measurement.error = sd_me_het1, asymptotic = FALSE))
 
 plot(mod_simex1)
 

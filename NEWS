@@ -1,14 +1,26 @@
 simex NEWS:
 ===========
+
+Version 1.7:
+------------
+(by Heidi Seibold & Wolfgang Lederer)
+
+* Option fitting.method in function simex() now really works properly for "linear" (Wolfgang)
+* Smaller documentation fixes (Wolfgang & Heidi)
+* Upload to Github and moving documentation to roxygen2 (Wolfgang)
+* Support for polr() (Chris Lawrence)
+
+
+
 Version 1.5:
 ------------
-(by Heidi Bold & Wolfgang Lederer)
+(by Heidi Seibold & Wolfgang Lederer)
 
 * Option fitting.method in function simex() now works properly for "linear" (Wolfgang)
 
 * Measurement errors may now be heteroscedastic. Therefore the input-type had (Heidi)
   to be changed. The measurement error now has to be a matrix.
-  
+
 * The functions simex and print.summary.simex were adjusted. (Heidi)
 
 
@@ -17,6 +29,7 @@ Version 1.5:
 Version 1.4:
 ------------
 (by Ph. Grosjean <phgrosjean@sciviews.org>)
+
 * Object classes were renamed 'simex' and 'mcsimex' to match their constructor's
   names simex() and mcsimex().
 

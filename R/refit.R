@@ -1,4 +1,7 @@
+
+#' @export
+
 refit <-
-function(object, ...)
-UseMethod("refit")
+  function(object, ...)
+    UseMethod("refit")
 
