@@ -173,6 +173,18 @@ mcsimex <- function(model,
     stop("The option Hessian must be enabled in the naive model", call. = FALSE)
   if (class(model)[1] == "polr" && asymptotic)
     stop("Asymptotic estimation is not supported for polr models", call. = FALSE)
+
+  if (class(model)[1] == "coxph" && asymptotic)
+      stop("Asymptotic estimation is not supported for coxph models", call. = FALSE)
+  if (class(model)[1] == "coxph" && is.null(model$model))
+      stop("The option model = TRUE must be enabled for coxph models", call. = FALSE)
+  if (class(model)[1] == "coxph" && grep("Surv\\(", names(model$model)[1]) == 1){
+      timeEventMatrix <- as.matrix(model$model[[1]])
+      timeName <- sub("Surv\\(","",strsplit(names(model$model)[1], ", ")[[1]][1])
+      eventName <- sub("\\)","",strsplit(names(model$model)[1], ", ")[[1]][2])
+      colnames(timeEventMatrix) <- c(timeName, eventName)
+      model$model <- cbind(model$model, timeEventMatrix)
+  }
   if (!any(names(model) == "x") && asymptotic && class(model)[1] != "polr")
     stop("The option x must be enabled in the naive model for asymptotic variance estimation",
          call. = FALSE)
@@ -350,10 +362,13 @@ mcsimex <- function(model,
   type <- 'response'
   if (class(model)[1] == "polr")
     type <- 'probs'
+  if (class(model)[1] == "coxph"){
+      type <- 'lp'  ## Which type of prediction makes sense for residuals?
+  }
   fitted.values <- predict(erg, newdata = model$model[, -1, drop = FALSE],
                            type = type)
   erg$fitted.values <- fitted.values
-  if (class(model)[1] == "polr")
+  if (class(model)[1] == "polr" || class(model)[1] ==  "coxph")
     erg$residuals <- NULL
   else if (is.factor(model$model[, 1]))
     erg$residuals <- as.numeric(levels(model$model[, 1]))[model$model[, 1]] - fitted.values
@@ -382,7 +397,7 @@ mcsimex <- function(model,
 
 plot.mcsimex <- function(x,
                          xlab = expression((1 + lambda)),
-                         ylab = colnames(b[, -1]),
+                         ylab = colnames(b)[-1],
                          ask = FALSE,
                          show = rep(TRUE, NCOL(b) - 1),
                          ...) {
@@ -396,8 +411,8 @@ plot.mcsimex <- function(x,
   a <- seq(-1, max(b[, 1]), by = 0.01)
   d <- matrix(data = NA, nrow = length(a), ncol = NCOL(b) - 1)
   switch(x$fitting.method,
-         quad = d <- predict(x$extrapolation, newdata = data.frame(lambda = a)),
-         line = d <- predict(x$extrapolation, newdata = data.frame(lambda = a)),
+         quad = d <- matrix(predict(x$extrapolation, newdata = data.frame(lambda = a)), nrow = length(a), ncol = NCOL(b) - 1),
+         line = d <- matrix(predict(x$extrapolation, newdata = data.frame(lambda = a)), nrow = length(a), ncol = NCOL(b) - 1),
          nonl = for (i in 1:length(p.names)) d[, i] <- predict(x$extrapolation[[p.names[i]]],
                                                                newdata = data.frame(lambda = a)),
          log2 = for (i in 1:length(p.names)) d[, i] <- predict(x$extrapolation[[p.names[i]]], newdata = data.frame(lambda = a)) -
